@@ -1,0 +1,6 @@
+[submodule "ext/xbot_framework"]
+	path = ext/xbot_framework
+	url = https://github.com/ClemensElflein/xbot_framework.git
+[submodule "ext/littlefs"]
+	path = ext/littlefs
+	url = https://github.com/littlefs-project/littlefs.git

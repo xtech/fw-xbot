@@ -1,0 +1,35 @@
+{
+  "type": "EmergencyService",
+  "version": 1,
+  "inputs": [
+    {
+      "id": 0,
+      "name": "High Level Emergency",
+      "type": "uint16_t[2]"
+    }
+  ],
+  "outputs": [
+    {
+      "id": 0,
+      "name": "Emergency Reason",
+      "type": "uint16_t"
+    }
+  ],
+  "enums": [
+    {
+      "id": "EmergencyReason",
+      "base_type": "uint16_t",
+      "bitmask": true,
+      "values": {
+        "LATCH": 0,
+        "TIMEOUT_INPUTS": 1,
+        "STOP": 2,
+        "LIFT": 3,
+        "LIFT_MULTIPLE": 4,
+        "COLLISION": 5,
+        "TIMEOUT_HIGH_LEVEL": 6,
+        "HIGH_LEVEL": 7
+      }
+    }
+  ]
+}
