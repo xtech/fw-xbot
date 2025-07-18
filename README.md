@@ -13,6 +13,12 @@ xBot is an educational robotics platform designed for learning ROS2 (Robot Opera
 
 This firmware specifically handles the low-level interfaces to control the hardware of the Mainboard.
 
+## Web UI
+The firmware features a web UI which shows current data and can be used to set up the robot.
+![Web UI](.github/img/screenshot-webui.png)
+
+
+
 ## System Architecture
 
 The firmware is built on a service-oriented architecture where different functionalities are implemented as services:
