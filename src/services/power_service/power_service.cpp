@@ -23,45 +23,12 @@ void PowerService::tick() {
   xbot::service::Lock lk{&mtx_};
   // Send the sensor values
   StartTransaction();
-  if (charger_configured_) {
-    switch (charger_status) {
-      case CHARGER_STATUS::NOT_CHARGING:
-        SendChargingStatus(CHARGE_STATUS_NOT_CHARGING_STR, strlen(CHARGE_STATUS_NOT_CHARGING_STR));
-        break;
-      case CHARGER_STATUS::TRICKLE:
-        SendChargingStatus(CHARGE_STATUS_TRICKLE_STR, strlen(CHARGE_STATUS_TRICKLE_STR));
-        break;
-      case CHARGER_STATUS::PRE_CHARGE:
-        SendChargingStatus(CHARGE_STATUS_PRE_CHARGE_STR, strlen(CHARGE_STATUS_PRE_CHARGE_STR));
-        break;
-      case CHARGER_STATUS::CC: SendChargingStatus(CHARGE_STATUS_CC_STR, strlen(CHARGE_STATUS_CC_STR)); break;
-      case CHARGER_STATUS::CV: SendChargingStatus(CHARGE_STATUS_CV_STR, strlen(CHARGE_STATUS_CV_STR)); break;
-      case CHARGER_STATUS::TOP_OFF:
-        SendChargingStatus(CHARGE_STATUS_TOP_OFF_STR, strlen(CHARGE_STATUS_TOP_OFF_STR));
-        break;
-      case CHARGER_STATUS::DONE: SendChargingStatus(CHARGE_STATUS_DONE_STR, strlen(CHARGE_STATUS_DONE_STR)); break;
-      case CHARGER_STATUS::FAULT: SendChargingStatus(CHARGE_STATUS_FAULT_STR, strlen(CHARGE_STATUS_FAULT_STR)); break;
-      case CHARGER_STATUS::COMMS_ERROR:
-      case CHARGER_STATUS::UNKNOWN:
-        SendChargingStatus(CHARGE_STATUS_UNKNOWN_STR, strlen(CHARGE_STATUS_UNKNOWN_STR));
-        break;
-      default: SendChargingStatus(CHARGE_STATUS_ERROR_STR, strlen(CHARGE_STATUS_ERROR_STR)); break;
-    }
-  } else {
-    SendChargingStatus(CHARGE_STATUS_NOT_FOUND_STR, strlen(CHARGE_STATUS_NOT_FOUND_STR));
-  }
+  auto status_str = GetChargerStatus();
+  SendChargingStatus(status_str, strlen(status_str));
   SendBatteryVoltage(battery_volts);
   SendChargeVoltage(adapter_volts);
   SendChargeCurrent(charge_current);
   SendChargerEnabled(true);
-  float battery_percent;
-  if (BatteryFullVoltage.valid && BatteryEmptyVoltage.valid) {
-    battery_percent =
-        (battery_volts - BatteryEmptyVoltage.value) / (BatteryFullVoltage.value - BatteryEmptyVoltage.value);
-  } else {
-    battery_percent = (battery_volts - robot->Power_GetDefaultBatteryEmptyVoltage()) /
-                      (robot->Power_GetDefaultBatteryFullVoltage() - robot->Power_GetDefaultBatteryEmptyVoltage());
-  }
   SendBatteryPercentage(etl::max(0.0f, etl::min(1.0f, battery_percent)));
   CommitTransaction();
 }
@@ -78,11 +45,7 @@ void PowerService::charger_tick() {
       bool success = true;
       success &= charger_->setPreChargeCurrent(0.250f);
       success &= charger_->setTerminationCurrent(0.250f);
-      if (ChargeCurrent.valid && ChargeCurrent.value > 0) {
-        success &= charger_->setChargingCurrent(ChargeCurrent.value, false);
-      } else {
-        success &= charger_->setChargingCurrent(robot->Power_GetDefaultChargeCurrent(), false);
-      }
+      success &= charger_->setChargingCurrent(robot->Power_GetDefaultChargeCurrent(), false);
       // Disable temperature sense, the battery doesnt have it
       success &= charger_->setTsEnabled(false);
       charger_configured_ = success;
@@ -125,6 +88,20 @@ void PowerService::charger_tick() {
       }
       success &= s;
     }
+    {
+      bool s = charger_->readAdapterCurrent(adapter_current);
+      if (!s) {
+        ULOG_ARG_WARNING(&service_id_, "Error Reading Adapter Current");
+      }
+      success &= s;
+    }
+
+    if (success) {
+      battery_percent = etl::max(0.0f, etl::min(1.0f, (battery_volts - robot->Power_GetDefaultBatteryEmptyVoltage()) /
+                                                          (robot->Power_GetDefaultBatteryFullVoltage() -
+                                                           robot->Power_GetDefaultBatteryEmptyVoltage())));
+    }
+
     charger_status = charger_->getChargerStatus();
 
     if (!success || charger_status == CHARGER_STATUS::COMMS_ERROR) {

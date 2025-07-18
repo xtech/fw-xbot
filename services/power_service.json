@@ -38,33 +38,7 @@
       "type": "float"
     }
   ],
-  "registers": [
-    {
-      "id": 0,
-      "name": "Charge Current",
-      "type": "float"
-    },
-    {
-      "id": 1,
-      "name": "Battery Empty Voltage",
-      "type": "float"
-    },
-    {
-      "id": 2,
-      "name": "Battery Full Voltage",
-      "type": "float"
-    },
-    {
-      "id": 3,
-      "name": "Critical Battery Low Voltage",
-      "type": "float"
-    },
-    {
-      "id": 4,
-      "name": "Critical Battery High Voltage",
-      "type": "float"
-    }
-  ],
+  "registers": [],
   "type": "PowerService",
   "version": 1
 }

@@ -21,6 +21,7 @@ class BQ2579 : public ChargerDriver {
   bool readAdapterVoltage(float &result) override;
   bool readBatteryVoltage(float &result) override;
   bool readSystemVoltage(float &result);
+  bool readAdapterCurrent(float &result) override;
 
  private:
   static constexpr uint8_t DEVICE_ADDRESS = 0x6B;
@@ -35,6 +36,7 @@ class BQ2579 : public ChargerDriver {
   static constexpr uint8_t REG_Termination_Control = 0x09;
   static constexpr uint8_t REG_NTC_Control_1 = 0x18;
   static constexpr uint8_t REG_Charger_Control_1 = 0x10;
+  static constexpr uint8_t REG_Charger_Control_5 = 0x14;
   static constexpr uint8_t REG_Charger_Status_1 = 0x1C;
   static constexpr uint8_t REG_FAULT_Status_0 = 0x20;
   static constexpr uint8_t REG_FAULT_Status_1 = 0x21;

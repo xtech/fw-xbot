@@ -29,6 +29,10 @@ class PowerService : public PowerServiceBase {
     xbot::service::Lock lk{&mtx_};
     return adapter_volts;
   }
+  [[nodiscard]] float GetAdapterCurrent() {
+    xbot::service::Lock lk{&mtx_};
+    return adapter_current;
+  }
 
   [[nodiscard]] float GetBatteryVolts() {
     xbot::service::Lock lk{&mtx_};
@@ -38,6 +42,25 @@ class PowerService : public PowerServiceBase {
   [[nodiscard]] float GetBatteryPercent() {
     xbot::service::Lock lk{&mtx_};
     return battery_percent;
+  }
+
+  [[nodiscard]] const char* GetChargerStatus() const {
+    if (charger_configured_) {
+      switch (charger_status) {
+        case CHARGER_STATUS::NOT_CHARGING: return CHARGE_STATUS_NOT_CHARGING_STR;
+        case CHARGER_STATUS::TRICKLE: return CHARGE_STATUS_TRICKLE_STR;
+        case CHARGER_STATUS::PRE_CHARGE: return CHARGE_STATUS_PRE_CHARGE_STR;
+        case CHARGER_STATUS::CC: return CHARGE_STATUS_CC_STR;
+        case CHARGER_STATUS::CV: return CHARGE_STATUS_CV_STR;
+        case CHARGER_STATUS::TOP_OFF: return CHARGE_STATUS_TOP_OFF_STR;
+        case CHARGER_STATUS::DONE: return CHARGE_STATUS_DONE_STR;
+        case CHARGER_STATUS::FAULT: return CHARGE_STATUS_FAULT_STR;
+        case CHARGER_STATUS::COMMS_ERROR:
+        case CHARGER_STATUS::UNKNOWN: return CHARGE_STATUS_UNKNOWN_STR;
+        default: return CHARGE_STATUS_ERROR_STR;
+      }
+    }
+    return CHARGE_STATUS_NOT_FOUND_STR;
   }
 
  protected:
@@ -68,6 +91,7 @@ class PowerService : public PowerServiceBase {
   bool charger_configured_ = false;
   float charge_current = 0;
   float adapter_volts = 0;
+  float adapter_current = 0;
   float battery_volts = 0;
   float battery_percent = 0;
   int critical_count = 0;

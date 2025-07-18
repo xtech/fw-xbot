@@ -9,6 +9,7 @@
 #include <etl/string.h>
 
 #include <ImuServiceBase.hpp>
+#include <xbot-service/Lock.hpp>
 
 using namespace xbot::service;
 
@@ -20,11 +21,17 @@ class ImuService : public ImuServiceBase {
   explicit ImuService(const uint16_t service_id) : ImuServiceBase(service_id, wa, sizeof(wa)) {
   }
 
+  void GetAxes(double *axes) {
+    xbot::service::Lock lk{&mtx_};
+    memcpy(axes, this->axes, sizeof(this->axes));
+  }
+
  protected:
   void OnCreate() override;
-  bool OnStart() override;
 
  private:
+  MUTEX_DECL(mtx_);
+
   bool imu_found = false;
   etl::string<255> error_message{};
 
@@ -33,10 +40,6 @@ class ImuService : public ImuServiceBase {
   int16_t data_raw_temperature;
   double axes[9]{};
   float temperature_degC;
-
-  // Default (YardForce mainboard) mapping: +X-Y-Z
-  etl::array<uint8_t, 3> axis_remap_idx_{1, 2, 3};
-  etl::array<int8_t, 3> axis_remap_sign_{1, -1, -1};
 
   void tick();
   ServiceSchedule tick_schedule_{*this, 10'000, XBOT_FUNCTION_FOR_METHOD(ImuService, &ImuService::tick, this)};

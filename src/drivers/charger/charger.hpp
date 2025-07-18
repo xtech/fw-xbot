@@ -36,6 +36,7 @@ class ChargerDriver {
   virtual bool setTsEnabled(bool enabled) = 0;
   virtual bool readChargeCurrent(float &result) = 0;
   virtual bool readAdapterVoltage(float &result) = 0;
+  virtual bool readAdapterCurrent(float &result) = 0;
   virtual bool readBatteryVoltage(float &result) = 0;
 
   void setI2C(I2CDriver *i2c) {

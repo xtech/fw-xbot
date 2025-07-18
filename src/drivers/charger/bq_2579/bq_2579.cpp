@@ -63,6 +63,10 @@ bool BQ2579::init() {
     return false;
   }
 
+  if (!writeRegister8(REG_Charger_Control_5, 0b00110110)) {
+    return false;
+  }
+
   return true;
 }
 bool BQ2579::resetWatchdog() {
@@ -98,6 +102,12 @@ bool BQ2579::readChargeCurrent(float& result) {
 bool BQ2579::readAdapterVoltage(float& result) {
   uint16_t raw_result = 0;
   if (!readRegister(REG_VBUS_ADC, raw_result)) return false;
+  result = static_cast<float>(raw_result) / 1000.0f;
+  return true;
+}
+bool BQ2579::readAdapterCurrent(float& result) {
+  uint16_t raw_result = 0;
+  if (!readRegister(REG_IBUS_ADC, raw_result)) return false;
   result = static_cast<float>(raw_result) / 1000.0f;
   return true;
 }

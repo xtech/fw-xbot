@@ -19,6 +19,7 @@
 #include <xbot-service/RemoteLogging.hpp>
 #include <xbot-service/portable/system.hpp>
 
+#include "api.hpp"
 #include "globals.hpp"
 #include "heartbeat.h"
 #include "id_eeprom.h"
@@ -53,6 +54,10 @@ int main() {
 #endif
 #ifdef USE_SEGGER_SYSTEMVIEW
   SYSVIEW_ChibiOS_Start(STM32_SYS_CK, STM32_SYS_CK, "I#15=SysTick");
+#endif
+
+#ifndef RELEASE_BUILD
+  chThdSleepMilliseconds(1000);
 #endif
 
   /*
@@ -98,6 +103,8 @@ int main() {
       chThdSleep(TIME_S2I(1));
     }
   }
+
+  InitRestAPI();
 
   robot = GetRobot();
   if (!robot->IsHardwareSupported()) {

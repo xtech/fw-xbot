@@ -41,6 +41,12 @@ target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC -Wall -Wextra -Werror)
 add_subdirectory(ext)
 target_compile_definitions(ulog PUBLIC ULOG_ENABLED)
 
+# Add mongoose (here because the mongoose folder will be overwritten by the wizard)
+add_library(mongoose mongoose/mongoose.c mongoose/mongoose_impl.c mongoose/mongoose_fs.c)
+target_include_directories(mongoose PUBLIC mongoose)
+target_link_libraries(mongoose PUBLIC ChibiOS)
+target_compile_definitions(mongoose PUBLIC MG_ARCH=MG_ARCH_CUSTOM)
+
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -81,6 +87,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         src/debug/debuggable_driver.cpp
         robots/src/robot.cpp
         ${PLATFORM_SOURCES}
+        # API
+        src/api.cpp
 )
 
 # Add include paths
@@ -106,6 +114,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC
         etl::etl
         LittleFS
         lwjson
+        mongoose
 )
 
 target_add_service(${CMAKE_PROJECT_NAME} ImuService ${CMAKE_CURRENT_SOURCE_DIR}/services/imu_service.json)
